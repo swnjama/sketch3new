@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
+  <script src="https://tonejs.github.io/build/Tone.js"></script>
+</head>
+
+<body>
+  <button onclick="start()" style="z-index: 2; position: absolute; top: 10px; left: 10px;">Start</button>
+  <button onclick="stop()" style="z-index: 2; position: absolute; top: 10px; left: 80px;">Stop</button>
+
+  <script>
+    /* global nn, Tone */
+
+    const gifs = [
+      'https://swnjama.github.io/winterattempt/winterfinal.gif',
+      'https://raw.githubusercontent.com/swnjama/winterattempt/main/winter2gif.gif',
+      'https://raw.githubusercontent.com/swnjama/winterattempt/main/winter3.gif',
+      'https://raw.githubusercontent.com/swnjama/winterattempt/main/winter4.gif',
+      'https://raw.githubusercontent.com/swnjama/winterattempt/main/winter5.gif',
+      'https://swnjama.github.io/winterattempt/winter6.gif',
+      'https://swnjama.github.io/winterattempt/winter7.gif',
+      'https://swnjama.github.io/winterattempt/winter8.gif',
+    ];
+
+    const state = {
+      step: 0,
+      notes: [],
+      gifElement: null,
+      isPlaying: false,
+    };
+
+    const synth = new Tone.Synth().toDestination();
+    synth.oscillator.type = 'sine';
+
+    function randomArpeggio(length) {
+      const arpeggio = [];
+      const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B']; // Only use C to B for simplicity
+      for (let i = 0; i < length; i++) {
+        const noteIndex = Math.floor(Math.random() * notes.length);
+        const note = notes[noteIndex];
+        arpeggio.push(note);
+      }
+      return arpeggio;
+    }
+
+    function play(time) {
+      const s = state.step % state.notes.length;
+      const note = state.notes[s];
+      synth.triggerAttackRelease(note, '8n', time);
+      state.step++;
+      updateGif(note);
+    }
+
+    function start() {
+      Tone.start(); // Start audio context in response to user interaction
+      if (!state.isPlaying) {
+        Tone.Transport.start();
+        state.isPlaying = true;
+        updateGif(state.notes[0]);
+      }
+    }
+
+    function stop() {
+      if (state.isPlaying) {
+        Tone.Transport.stop();
+        state.isPlaying = false;
+        if (state.gifElement) {
+          state.gifElement.remove();
+        }
+      }
+    }
+
+    function setup() {
+      state.notes = randomArpeggio(5);
+      console.log(state.notes);
+    }
+
+    function updateGif(note) {
+      const index = note.charCodeAt(0) % gifs.length;
+      const gifUrl = gifs[index];
+      if (state.gifElement) {
+        state.gifElement.remove();
+      }
+      state.gifElement = nn.create('img')
+        .set({
+          src: gifUrl
+        })
+        .css({
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 1,
+        })
+        .addTo('body');
+    }
+
+    nn.on('load', setup);
+  </script>
+</body>
+
+</html>
