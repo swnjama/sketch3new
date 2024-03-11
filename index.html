@@ -38,7 +38,7 @@
 
     function randomArpeggio(length) {
       const arpeggio = [];
-      const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B']; // Only use C to B for simplicity
+      const notes = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4']; // Only use C to B for simplicity
       for (let i = 0; i < length; i++) {
         const noteIndex = Math.floor(Math.random() * notes.length);
         const note = notes[noteIndex];
@@ -100,6 +100,8 @@
     }
 
     nn.on('load', setup);
+  Tone.Transport.bpm.value = 120
+  Tone.Transport.scheduleRepeat(time => play(time), '8n')
   </script>
 </body>
 
